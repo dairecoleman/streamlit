@@ -30,6 +30,8 @@ message Metric {
   string help = 6;
   LabelVisibilityMessage label_visibility = 7;
   bool show_border = 8;
+  string body_markdown = 9;  // Markdown-rendered value
+  string delta_markdown = 10; // Markdown-rendered delta
 
   enum MetricColor{
     RED = 0;
