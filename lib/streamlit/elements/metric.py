@@ -60,15 +60,15 @@ class MetricMixin:
         self,
         label: str,
         value: Value,
-        value_is_markdown: bool = False,
         delta: Delta = None,
-        delta_is_markdown: bool = False,
         delta_color: DeltaColor = "normal",
         help: str | None = None,
         label_visibility: LabelVisibility = "visible",
         border: bool = False,
         width: Width = "stretch",
         height: Height = "content",
+        delta_is_markdown: bool = False,
+        value_is_markdown: bool = False,
     ) -> DeltaGenerator:
         r"""Display a metric in big bold font, with an optional indicator of how the metric changed.
 
