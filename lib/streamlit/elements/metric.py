@@ -60,7 +60,9 @@ class MetricMixin:
         self,
         label: str,
         value: Value,
+        value_is_markdown: bool = False,
         delta: Delta = None,
+        delta_is_markdown: bool = False,
         delta_color: DeltaColor = "normal",
         help: str | None = None,
         label_visibility: LabelVisibility = "visible",
@@ -220,8 +222,12 @@ class MetricMixin:
 
         metric_proto = MetricProto()
         metric_proto.body = _parse_value(value)
+        if value_is_markdown:
+            metric_proto.body_markdown = metric_proto.body
         metric_proto.label = _parse_label(label)
         metric_proto.delta = _parse_delta(delta)
+        if delta_is_markdown:
+            metric_proto.delta_markdown = metric_proto.delta
         metric_proto.show_border = border
         if help is not None:
             metric_proto.help = dedent(help)
