@@ -44,8 +44,10 @@ function Metric({ element }: Readonly<MetricProps>): ReactElement {
   const { MetricDirection } = MetricProto
   const {
     body,
+    bodyMarkdown,
     label,
     delta,
+    deltaMarkdown,
     direction,
     color,
     labelVisibility,
@@ -86,8 +88,15 @@ function Metric({ element }: Readonly<MetricProps>): ReactElement {
           </StyledWidgetLabelHelpInline>
         )}
       </StyledMetricLabelText>
+
       <StyledMetricValueText data-testid="stMetricValue">
-        <StyledTruncateText> {body} </StyledTruncateText>
+        <StyledTruncateText>
+          {bodyMarkdown ? (
+            <StreamlitMarkdown source={bodyMarkdown} allowHTML={false} />
+          ) : (
+            body
+          )}
+        </StyledTruncateText>
       </StyledMetricValueText>
       {deltaExists && (
         <StyledMetricDeltaText data-testid="stMetricDelta" metricColor={color}>
@@ -103,7 +112,13 @@ function Metric({ element }: Readonly<MetricProps>): ReactElement {
               margin={arrowMargin}
             />
           )}
-          <StyledTruncateText> {delta} </StyledTruncateText>
+          <StyledTruncateText>
+            {deltaMarkdown ? (
+              <StreamlitMarkdown source={deltaMarkdown} allowHTML={false} />
+            ) : (
+              delta
+            )}
+          </StyledTruncateText>
         </StyledMetricDeltaText>
       )}
     </StyledMetricContainer>
