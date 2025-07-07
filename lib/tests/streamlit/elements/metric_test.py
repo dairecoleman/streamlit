@@ -119,6 +119,108 @@ class MetricTest(DeltaGeneratorTestCase):
             assert c.label == "label_test"
             assert delta_value == c.delta
 
+    @parameterized.expand(
+        [
+            (True, True),  # Both value and delta have optional markdown fields
+            (True, False),  # Only value has optional markdown field
+            (False, True),  # Only delta has optional markdown field
+            (False, False),  # Neither have optional markdown fields
+        ]
+    )
+    def test_value_and_delta_markdown_flags_combinations(
+        self, value_is_md, delta_is_md
+    ):
+        """Test all combinations of value_is_markdown and delta_is_markdown flags."""
+        value_inputs = [
+            "**$1.2M**",
+            "_15,000_",
+            "`CPU @ 75%`",
+            "⚡ 120 km/h",
+            "💹",
+            5432,
+            ":+1:",
+            None,
+            "",
+        ]
+        delta_inputs = [
+            "+ **$200K**",
+            1000,
+            "`+10%`",
+            "🔽 -15%",
+            "**+5%**",
+            "-321",
+            "+45",
+            None,
+            "",
+        ]
+        expected_markdown_values = [
+            "**$1.2M**",
+            "_15,000_",
+            "`CPU @ 75%`",
+            "⚡ 120 km/h",
+            "💹",
+            "5432",
+            ":+1:",
+            "—",
+            "",
+        ]
+        expected_markdown_deltas = [
+            "+ **$200K**",
+            "1000",
+            "`+10%`",
+            "🔽 -15%",
+            "**+5%**",
+            "-321",
+            "+45",
+            "",
+            "",
+        ]
+
+        for (
+            value_input,
+            delta_input,
+            expected_markdown_value,
+            expected_markdown_delta,
+        ) in zip(
+            value_inputs,
+            delta_inputs,
+            expected_markdown_values,
+            expected_markdown_deltas,
+        ):
+            st.metric(
+                "markdown_flag_test",
+                value_input,
+                delta_input,
+                value_is_markdown=value_is_md,
+                delta_is_markdown=delta_is_md,
+            )
+            c = self.get_delta_from_queue().new_element.metric
+
+            if value_is_md:
+                assert c.body_markdown == expected_markdown_value
+            else:
+                assert not c.HasField("body_markdown")
+            assert c.body == expected_markdown_value
+
+            if delta_is_md:
+                assert c.delta_markdown == expected_markdown_delta
+            else:
+                assert not c.HasField("delta_markdown")
+            assert c.delta == expected_markdown_delta
+
+    def test_value_and_delta_backwards_compatability(self):
+        """Test that the markdown value and delta fields are unset proto values by default"""
+        arg_values = [" -253", "+25", "26", 123, -123, 1.234, -1.5, None, ""]
+        delta_values = ["-253", "+25", "26", "123", "-123", "1.234", "-1.5", "", ""]
+
+        for arg_value, delta_value in zip(arg_values, delta_values):
+            st.metric("value_delta_markdown_default_false_test", arg_value, delta_value)
+            c = self.get_delta_from_queue().new_element.metric
+            assert not c.HasField("body_markdown")
+            assert not c.HasField("delta_markdown")
+            assert c.body == str(arg_value) or c.body == "—"
+            assert c.delta == delta_value
+
     def test_delta_color(self):
         """Test that metric delta colors returns the correct proto value."""
         arg_delta_values = ["-123", -123, -1.23, "123", 123, 1.23, None, ""]
